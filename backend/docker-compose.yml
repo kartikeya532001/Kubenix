@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  api:
+    build: ./api
+    container_name: llm-api
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+
+  worker:
+    build: ./worker
+    container_name: llm-worker
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+    restart: always
