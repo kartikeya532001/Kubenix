@@ -2,12 +2,12 @@ name: Backend CI - Scan & Push
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - "backend/**"
       - ".github/workflows/backend.yml"
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - "backend/**"
       - ".github/workflows/backend.yml"
@@ -47,7 +47,7 @@ jobs:
     # SonarCloud Scan
     # -------------------------
     - name: SonarCloud Scan
-      uses: sonarsource/sonarcloud-github-action@master
+      uses: sonarsource/sonarcloud-github-action@8fce5a1b9c9f0b8c3b6b7a9e2a4c5d6e7f8a9b0c
       with:
         projectBaseDir: backend
         args: >
@@ -96,7 +96,7 @@ jobs:
     # Docker Login
     # -------------------------
     - name: Login to Docker Hub
-      uses: docker/login-action@v3
+      uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
