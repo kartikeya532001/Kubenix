@@ -1,0 +1,100 @@
+name: Infra Deploy (Terraform)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "infra/**"
+  pull_request:
+    branches: [ main ]
+    paths:
+      - "infra/**"
+  workflow_dispatch:
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      # -------------------------
+      # Checkout code
+      # -------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # -------------------------
+      # Setup Terraform
+      # -------------------------
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+          terraform_wrapper: false
+
+      # -------------------------
+      # Configure AWS Credentials
+      # -------------------------
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      # -------------------------
+      # Terraform Init (REMOTE STATE)
+      # -------------------------
+      - name: Terraform Init
+        working-directory: infra/terraform
+        run: |
+          terraform init \
+            -reconfigure \
+            -upgrade
+
+      # -------------------------
+      # Terraform Validate
+      # -------------------------
+      - name: Terraform Validate
+        working-directory: infra/terraform
+        run: terraform validate
+
+      # -------------------------
+      # Terraform Plan
+      # -------------------------
+      - name: Terraform Plan
+        working-directory: infra/terraform
+        run: terraform plan -out=tfplan
+
+      # -------------------------
+      # Terraform Apply (only on master)
+      # -------------------------
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/master'
+        working-directory: infra/terraform
+        run: terraform apply -auto-approve tfplan
+
+      # -------------------------
+      # Export EKS SSH Key (if exists)
+      # -------------------------
+      - name: Export EKS SSH Key
+        working-directory: infra/terraform
+        run: |
+          if terraform output -json | jq -e '.eks_private_key_pem.value' >/dev/null; then
+            terraform output -raw eks_private_key_pem > llm-eks-key.pem
+            chmod 400 llm-eks-key.pem
+          else
+            echo "eks_private_key_pem output not found – skipping"
+          fi
+
+      # -------------------------
+      # Upload SSH Key Artifact
+      # -------------------------
+      - name: Upload SSH Key Artifact
+        if: github.ref == 'refs/heads/master'
+        uses: actions/upload-artifact@v4
+        with:
+          name: llm-eks-key
+          path: infra/terraform/llm-eks-key.pem
