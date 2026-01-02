@@ -107,7 +107,7 @@ const ChatApp = () => {
         }}
       >
         <Typography variant="h4" align="center" gutterBottom>
-          Presenting You...
+          Kubenix
         </Typography>
 
         <ChatWindow messages={messages} />
