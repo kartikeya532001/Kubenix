@@ -39,7 +39,16 @@ module "system_node" {
   min_size     = 1
   max_size     = 1
   desired_size = 1
-  disk_size    = 15
+  block_device_mappings = {
+   root = {
+      device_name = "/dev/xvda"
+      ebs = {
+        volume_size           = 20
+        volume_type           = "gp3"
+        delete_on_termination = true
+      }
+    }
+  }
 
   labels = {
     node-role = "system_node"
@@ -80,8 +89,16 @@ module "warm_node_group" {
   min_size     = 1
   max_size     = 1
   desired_size = 1
-  disk_size    = 100
-
+  block_device_mappings = {
+   root = {
+      device_name = "/dev/xvda"
+      ebs = {
+        volume_size           = 100
+        volume_type           = "gp3"
+        delete_on_termination = true
+      }
+    }
+  }
   labels = {
     node-role = "cpu"
     pool      = "warm"
@@ -131,7 +148,16 @@ module "spot_node_group" {
   min_size     = 0
   max_size     = 3
   desired_size = 0
-  disk_size    = 100
+  block_device_mappings = {
+    root = {
+      device_name = "/dev/xvda"
+      ebs = {
+        volume_size           = 30
+        volume_type           = "gp3"
+        delete_on_termination = true
+      }
+    }
+  }
 
   labels = {
     node-role = "cpu"
