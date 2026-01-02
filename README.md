@@ -21,7 +21,7 @@ All workflows are fully automated using **GitHub Actions**, from infrastructure 
 
 ---
 ## 🏗️ Architecture Overview
-he system follows a cloud-native, CI/CD-driven microservices architecture designed for scalability, security, and observability.
+The system follows a cloud-native, CI/CD-driven microservices architecture designed for scalability, security, and observability.
 
 ### 🔹 High-Level Flow
 
