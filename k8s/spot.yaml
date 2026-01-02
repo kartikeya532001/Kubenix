@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-worker-spot
+  namespace: app
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: llm-worker-spot
+  template:
+    metadata:
+      labels:
+        app: llm-worker-spot
+    spec:
+      nodeSelector:
+        pool: spot
+      tolerations:
+        - key: "spot-pool"
+          operator: "Equal"
+          value: "true"
+          effect: "PreferNoSchedule"
+      containers:
+        - name: worker
+          image: kartikeya532001/llm-worker:latest
+          imagePullPolicy: Always
+          env:
+            - name: REDIS_HOST
+              value: redis.app.svc.cluster.local
+            - name: REDIS_PORT
+              value: "6379"
+      imagePullSecrets:
+        - name: regcred

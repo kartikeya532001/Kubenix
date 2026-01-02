@@ -1,0 +1,27 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: llm-worker-scaledobject
+  namespace: app
+spec:
+  scaleTargetRef:
+    name: llm-worker-spot
+  pollingInterval: 5
+  cooldownPeriod: 30
+  minReplicaCount: 0
+  maxReplicaCount: 3
+  advanced:
+    restoreToOriginalReplicaCount: false
+  triggers:
+    - type: redis
+      metadata:
+        address: redis.app.svc.cluster.local:6379
+        listName: queue:high
+        listLength: "1"
+        activationThreshold: "1"
+    - type: redis
+      metadata:
+        address: redis.app.svc.cluster.local:6379
+        listName: queue:normal
+        listLength: "5"
+        activationThreshold: "5"

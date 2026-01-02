@@ -1,0 +1,74 @@
+name: Deploy Apps
+
+on:
+  workflow_run:
+    workflows: ["Backend CI - Scan & Push"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+
+    env:
+      CLUSTER_NAME: llm-cluster
+      NAMESPACE: app
+      IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/kubectl
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --name $CLUSTER_NAME \
+            --region ${{ secrets.AWS_REGION }}
+
+      - name: Ensure namespace exists
+        run: |
+          kubectl get ns $NAMESPACE || kubectl create ns $NAMESPACE
+
+      - name: Deploy manifests
+        run: |
+          kubectl apply -f k8s/redis.yaml
+          kubectl apply -f k8s/api.yaml
+          kubectl apply -f k8s/worker.yaml
+          kubectl apply -f k8s/spot.yaml
+          kubectl apply -f k8s/ingress.yaml
+            
+      - name: Update API image (force rollout)
+        run: |
+          kubectl set image deployment/api \
+            api=${{ secrets.DOCKERHUB_USERNAME }}/llm-api:${IMAGE_TAG} \
+            -n $NAMESPACE
+      - name: Update worker image (force rollout)
+        run: |
+          kubectl set image deployment/worker \
+            worker=${{ secrets.DOCKERHUB_USERNAME }}/llm-worker:${IMAGE_TAG} \
+            -n $NAMESPACE
+      - name: Update SPOT image (force rollout)
+        run: |
+          kubectl set image deployment/llm-worker-spot \
+            worker=${{ secrets.DOCKERHUB_USERNAME }}/llm-worker:${IMAGE_TAG} \
+            -n $NAMESPACE
+
+      - name: Verify rollout
+        run: |
+          kubectl rollout status deployment -n $NAMESPACE
+          kubectl get pods -n $NAMESPACE
+          kubectl get ingress -n $NAMESPACE
