@@ -23,7 +23,7 @@ All workflows are fully automated using **GitHub Actions**, from infrastructure 
 ## 🏗️ Architecture Overview
 he system follows a cloud-native, CI/CD-driven microservices architecture designed for scalability, security, and observability.
 
-# 🔹 High-Level Flow
+### 🔹 High-Level Flow
 
 - **Source Control (GitHub)**
       Developers push code to GitHub, triggering automated workflows.
@@ -81,7 +81,7 @@ he system follows a cloud-native, CI/CD-driven microservices architecture design
 ### 1️⃣ Frontend CI (`frontend.yml`)
 
 **Trigger:**  
-- Any change in the `frontend/` directory
+- Any change in the `chat-app/` directory
 
 **Pipeline steps:**
 - Install dependencies
