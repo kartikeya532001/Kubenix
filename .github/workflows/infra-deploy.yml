@@ -5,10 +5,14 @@ on:
     branches: [ main ]
     paths:
       - "infra/**"
+      - ".github/workflows/infra-deploy.yml"
+
   pull_request:
     branches: [ main ]
     paths:
       - "infra/**"
+      - ".github/workflows/infra-deploy.yml"
+
   workflow_dispatch:
 
 jobs:
@@ -69,10 +73,10 @@ jobs:
         run: terraform plan -out=tfplan
 
       # -------------------------
-      # Terraform Apply (only on master)
+      # Terraform Apply (only on main)
       # -------------------------
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         working-directory: infra/terraform
         run: terraform apply -auto-approve tfplan
 
@@ -93,7 +97,7 @@ jobs:
       # Upload SSH Key Artifact
       # -------------------------
       - name: Upload SSH Key Artifact
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
           name: llm-eks-key
