@@ -4,7 +4,7 @@ Kubenix is a **production-style DevOps project** that demonstrates a complete **
 
 All workflows are fully automated using **GitHub Actions**, from infrastructure provisioning to application deployment.
 
-![Alt text](images/dashboard.png)
+![Alt text](assets/dashboard.png)
 
 ---
 
