@@ -20,6 +20,47 @@ All workflows are fully automated using **GitHub Actions**, from infrastructure 
 - **Security**: Trivy & SonarQube  
 
 ---
+## 🏗️ Architecture Overview
+he system follows a cloud-native, CI/CD-driven microservices architecture designed for scalability, security, and observability.
+
+# 🔹 High-Level Flow
+
+- **Source Control (GitHub)**
+      Developers push code to GitHub, triggering automated workflows.
+
+- **CI/CD Pipeline (GitHub Actions)**
+      Code quality and security checks (linting, SAST, Trivy image scanning)
+      Docker image build and tagging
+      Container registry push
+
+- **Infrastructure Provisioning (Terraform)**
+      Automated creation and management of AWS infrastructure
+      EKS cluster, node groups, IAM roles, networking
+
+- **Container Orchestration (AWS EKS)**
+      Kubernetes manages deployments, services, and autoscaling
+      HPA and KEDA handle traffic- and event-based scaling
+
+- **Observability & Monitoring**
+      Prometheus collects metrics
+      Grafana visualizes system health and performance
+
+- **Security & Reliability**
+      Image vulnerability scanning
+      IAM-based access control
+      Rolling deployments with zero downtime
+---
+
+## 🧩 Architecture Diagram
+![Architecture Diagram](assets/architecture.png)
+---
+
+## 🔑 Key Architecture Principles
+- **Automation First** – Everything from build to deployment is automated
+- **Scalable by Design** – Horizontal autoscaling at pod and node level
+- **Security-Focused** – Shift-left security in CI/CD
+- **Production-Grade Observability** – Metrics-driven monitoring
+---
 
 ## 📂 Repository Structure
 
